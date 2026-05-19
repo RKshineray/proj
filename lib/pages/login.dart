@@ -3,6 +3,7 @@ import '../database/database_helper.dart';
 import 'cadastro.dart';
 import 'home.dart';
 
+
 class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -10,40 +11,27 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
 
-  final nomeController = TextEditingController();
   final emailController = TextEditingController();
   final senhaController = TextEditingController();
-
+  
   Future<void> fazerLogin() async {
 
-  final usuarios =
-      await DatabaseHelper.instance
-          .buscarUsuarios();
+  if (
+    emailController.text.isEmpty ||
+    senhaController.text.isEmpty
+  ) {
 
-  bool usuarioEncontrado = false;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
 
-  for (var usuario in usuarios) {
+      SnackBar(
+        content: Text(
+          "Preencha todos os campos",
+        ),
+      ),
+    );
 
-    if (
-      usuario['nome']
-              .toString()
-              .trim() ==
-          nomeController.text.trim() &&
-
-      usuario['email']
-              .toString()
-              .trim() ==
-          emailController.text.trim() &&
-
-      usuario['senha']
-              .toString()
-              .trim() ==
-          senhaController.text.trim()
-    ) {
-
-      usuarioEncontrado = true;
-      break;
-    }
+    return;
   }
 
   if (!emailController.text.contains("@")) {
@@ -61,194 +49,64 @@ class _LoginPageState extends State<LoginPage> {
     return;
   }
 
-  if (usuarioEncontrado) {
+  try {
 
-    Navigator.push(
-      context,
+    final usuario =
+        await DatabaseHelper.instance.login(
 
-      MaterialPageRoute(
-        builder: (context) => HomePage(),
-      ),
+      emailController.text.trim(),
+
+      senhaController.text.trim(),
     );
 
-  } else {
+    if (usuario != null) {
 
-    await showDialog(
+      Navigator.push(
 
-      context: context,
+        context,
 
-      builder: (context) {
+        MaterialPageRoute(
+          builder: (context) => HomePage(),
+        ),
+      );
 
-        return AlertDialog(
+    } else {
 
-          title: Text(
-            "Usuário não encontrado",
-          ),
+      showDialog(
 
-          content: Text(
-            "Você precisa criar uma conta.",
-          ),
+        context: context,
 
-          actions: [
+        builder: (context) {
 
-            TextButton(
-              onPressed: () {
+          return AlertDialog(
 
-                Navigator.pop(context);
-              },
-
-              child: Text("Fechar"),
+            title: Text(
+              "Conta não encontrada",
             ),
 
-            ElevatedButton(
-              onPressed: () {
-
-                Navigator.pop(context);
-
-                Future.delayed(
-                  Duration(milliseconds: 300),
-
-                  () {
-
-                    Navigator.push(
-                      context,
-
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            CadastroPage(),
-                      ),
-                    );
-                  },
-                );
-              },
-
-              child: Text("Cadastrar"),
+            content: Text(
+              "Você ainda não possui uma conta.\nDeseja criar uma?",
             ),
-          ],
-        );
-      },
-    );
-  }
-}
 
-  @override
-  Widget build(BuildContext context) {
+            actions: [
 
-    return Scaffold(
-      backgroundColor: Colors.white,
+              TextButton(
 
-      body: Padding(
-        padding: EdgeInsets.all(25),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
 
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-
-              SizedBox(height: 80),
-
-              Icon(
-                Icons.task_alt,
-                size: 100,
-                color: Colors.green,
+                child: Text("Cancelar"),
               ),
-
-              SizedBox(height: 20),
-
-              Text(
-                "TaskEasy",
-
-                style: TextStyle(
-                  fontSize: 35,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-
-              SizedBox(height: 10),
-
-              Text(
-                "Organize suas tarefas",
-                style: TextStyle(fontSize: 18),
-              ),
-
-              SizedBox(height: 50),
-
-              TextField(
-                controller: nomeController,
-
-                decoration: InputDecoration(
-                  hintText: "Nome",
-                  prefixIcon: Icon(Icons.person),
-
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 20),
-
-              TextField(
-                controller: emailController,
-
-                decoration: InputDecoration(
-                  hintText: "E-mail",
-                  prefixIcon: Icon(Icons.email),
-
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 20),
-
-              TextField(
-                controller: senhaController,
-                obscureText: true,
-
-                decoration: InputDecoration(
-                  hintText: "Senha",
-                  prefixIcon: Icon(Icons.lock),
-
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 30),
 
               ElevatedButton(
 
-                onPressed: fazerLogin,
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  minimumSize:
-                      Size(double.infinity, 55),
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(15),
-                  ),
-                ),
-
-                child: Text(
-                  "Entrar",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-
-              SizedBox(height: 20),
-
-              TextButton(
                 onPressed: () {
 
+                  Navigator.pop(context);
+
                   Navigator.push(
+
                     context,
 
                     MaterialPageRoute(
@@ -258,9 +116,145 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 },
 
-                child: Text("Criar Conta"),
-              )
+                child: Text(
+                  "Criar Conta",
+                ),
+              ),
             ],
+          );
+        },
+      );
+    }
+
+  } catch (e) {
+
+    print(e);
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+
+      SnackBar(
+        content: Text(
+          "Crie uma conta para continuar.",
+        ),
+      ),
+    );
+  }
+}
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    senhaController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+
+      backgroundColor: Colors.white,
+
+      body: Padding(
+
+        padding: EdgeInsets.all(25),
+
+        child: Center(
+
+          child: SingleChildScrollView(
+
+            child: Column(
+
+              children: [
+
+                Icon(
+                  Icons.task_alt,
+                  size: 90,
+                  color: Colors.green,
+                ),
+
+                SizedBox(height: 10),
+
+                Text(
+                  "TaskEasy",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+
+                SizedBox(height: 5),
+
+                Text(
+                  "Organize suas tarefas",
+                  style: TextStyle(fontSize: 16),
+                ),
+
+                SizedBox(height: 40),
+
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    hintText: "E-mail",
+                    prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 15),
+
+                TextField(
+                  controller: senhaController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: "Senha",
+                    prefixIcon: Icon(Icons.lock),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 25),
+
+                ElevatedButton(
+
+                  onPressed: fazerLogin,
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    minimumSize: Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+
+                  child: Text(
+                    "Entrar",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+
+                SizedBox(height: 10),
+
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CadastroPage(),
+                      ),
+                    );
+                  },
+                  child: Text("Criar conta"),
+                ),
+
+              ],
+            ),
           ),
         ),
       ),

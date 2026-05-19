@@ -19,18 +19,27 @@ class DatabaseHelper {
     return _database!;
   }
 
-  Future<Database> _initDB(String filePath) async {
+  Future<Database> _initDB(
+  String filePath,
+) async {
 
-    final dbPath = await getDatabasesPath();
+  final dbPath =
+      await getDatabasesPath();
 
-    final path = join(dbPath, filePath);
+  final path =
+      join(dbPath, filePath);
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _createDB,
-    );
-  }
+  await deleteDatabase(path);
+
+  return await openDatabase(
+
+    path,
+
+    version: 1,
+
+    onCreate: _createDB,
+  );
+}
 
   Future _createDB(Database db, int version) async {
 
@@ -38,7 +47,7 @@ class DatabaseHelper {
       CREATE TABLE usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT,
-        email TEXT,
+        email TEXT UNIQUE,
         senha TEXT
       )
     ''');
@@ -53,42 +62,101 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<int> criarUsuario(Map<String, dynamic> usuario) async {
+  Future<int> criarUsuario(
+    Map<String, dynamic> usuario,
+  ) async {
 
     final db = await instance.database;
 
-    return await db.insert('usuarios', usuario);
+    return await db.insert(
+      'usuarios',
+      usuario,
+    );
   }
 
-  Future<List<Map<String, dynamic>>> buscarUsuarios() async {
+  Future<List<Map<String, dynamic>>>
+      buscarUsuarios() async {
 
     final db = await instance.database;
 
     return await db.query('usuarios');
   }
 
-  Future<int> criarTarefa(Map<String, dynamic> tarefa) async {
+  Future<Map<String, dynamic>?> login(
+    String email,
+    String senha,
+  ) async {
 
     final db = await instance.database;
 
-    return await db.insert('tarefas', tarefa);
+    final result = await db.query(
+
+      'usuarios',
+
+      where: 'email = ? AND senha = ?',
+
+      whereArgs: [email, senha],
+    );
+
+    if (result.isNotEmpty) {
+
+      return result.first;
+    }
+
+    return null;
   }
 
-  Future<List<Map<String, dynamic>>> buscarTarefas() async {
+  Future<int> criarTarefa(
+    Map<String, dynamic> tarefa,
+  ) async {
+
+    final db = await instance.database;
+
+    return await db.insert(
+      'tarefas',
+      tarefa,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>>
+      buscarTarefas() async {
 
     final db = await instance.database;
 
     return await db.query('tarefas');
   }
 
-  Future<int> deletarTarefa(int id) async {
+  Future<int> deletarTarefa(
+    int id,
+  ) async {
 
     final db = await instance.database;
 
     return await db.delete(
+
       'tarefas',
+
       where: 'id = ?',
+
       whereArgs: [id],
+    );
+  }
+
+  Future<int> atualizarTarefa(
+    Map<String, dynamic> tarefa,
+  ) async {
+
+    final db = await instance.database;
+
+    return await db.update(
+
+      'tarefas',
+
+      tarefa,
+
+      where: 'id = ?',
+
+      whereArgs: [tarefa['id']],
     );
   }
 }

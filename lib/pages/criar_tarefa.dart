@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
 
 class CriarTarefaPage extends StatefulWidget {
+
   @override
-  State<CriarTarefaPage> createState() => _CriarTarefaPageState();
+  State<CriarTarefaPage> createState() =>
+      _CriarTarefaPageState();
 }
 
-class _CriarTarefaPageState extends State<CriarTarefaPage> {
+class _CriarTarefaPageState
+    extends State<CriarTarefaPage> {
 
-  TextEditingController tituloController = TextEditingController();
-  TextEditingController descricaoController = TextEditingController();
-  TextEditingController categoriaController = TextEditingController();
+  TextEditingController tituloController =
+      TextEditingController();
+
+  TextEditingController descricaoController =
+      TextEditingController();
+
+  TextEditingController categoriaController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -62,20 +71,37 @@ class _CriarTarefaPageState extends State<CriarTarefaPage> {
             SizedBox(height: 30),
 
             ElevatedButton(
-              onPressed: () {
 
-                if (tituloController.text.isNotEmpty) {
+              onPressed: () async {
+
+                if (tituloController
+                    .text
+                    .isNotEmpty) {
+
+                  await DatabaseHelper.instance
+                      .criarTarefa({
+
+                    'titulo':
+                        tituloController.text.trim(),
+
+                    'descricao':
+                        descricaoController.text.trim(),
+
+                    'categoria':
+                        categoriaController.text.trim(),
+                  });
 
                   Navigator.pop(
                     context,
-                    tituloController.text,
+                    true,
                   );
                 }
               },
 
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                minimumSize: Size(double.infinity, 50),
+                minimumSize:
+                    Size(double.infinity, 50),
               ),
 
               child: Text("Salvar"),
