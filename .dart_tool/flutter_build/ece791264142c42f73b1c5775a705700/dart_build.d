@@ -1,0 +1,1 @@
+ C:\\Users\\QI\\Documents\\Renan\\renan\\.dart_tool\\flutter_build\\ece791264142c42f73b1c5775a705700\\dart_build_result.json:  C:\\Users\\QI\\Documents\\Renan\\renan\\.dart_tool\\package_config.json C:\\Users\\QI\\Documents\\Renan\\renan\\pubspec.yaml C:\\flutter\\bin\\cache\\dart-sdk\\version c:\\users\\qi\\documents\\renan\\renan\\.dart_tool\\package_config.json
